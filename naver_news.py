@@ -1,6 +1,6 @@
 # ============================================================
 # 네이버 실시간 뉴스 검색 대시보드 (NCP API Gateway)
-# naver_search.py  — Modern Redesign (Light table fix)
+# naver_news.py  — Modern Redesign (Light table fix)
 # ============================================================
 import os
 import re
@@ -36,6 +36,24 @@ st.set_page_config(
 DARK_CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
+
+/* 시스템/브라우저 라이트모드 + Streamlit system theme 무시하고 앱 내부 다크 테마 강제 */
+html {
+    color-scheme: dark !important;
+}
+:root, [data-testid="stAppViewContainer"], [data-testid="stApp"], .stApp, body {
+    color-scheme: dark !important;
+    /* Streamlit 내장 테마 변수 강제 오버라이드 */
+    --background-color: #0b0f14 !important;
+    --secondary-background-color: #12181f !important;
+    --primary-color: #03C75A !important;
+    --text-color: #e8edf4 !important;
+    --font: "Noto Sans KR", sans-serif !important;
+    --secondary-text-color: #8b97a8 !important;
+    --widget-background-color: #1a222d !important;
+    --widget-border-color: #2a3441 !important;
+}
+
 :root {
     --bg-primary: #0b0f14;
     --bg-secondary: #12181f;
@@ -83,14 +101,37 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"], .main {
     background: var(--bg-secondary) !important;
     border-right: 1px solid var(--border) !important;
 }
-[data-testid="stSidebar"] * { color: var(--text-primary) !important; }
+/* 사이드바 글자색은 개별 요소에만 적용 (셀렉트박스 내부 글자색 덮어쓰지 않음) */
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] .stMarkdown,
+[data-testid="stSidebar"] p {
+    color: var(--text-primary) !important;
+}
 
+/* 검색어 입력창 — 이중 테두리 제거, 단일 테두리만 */
+[data-testid="stTextInput"] > div,
+[data-testid="stTextInput"] > div > div,
+[data-testid="stDateInput"] > div,
+[data-testid="stDateInput"] > div > div {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
 .stTextInput > div > div > input,
-.stDateInput > div > div > input {
+.stDateInput > div > div > input,
+[data-testid="stTextInput"] input,
+[data-testid="stDateInput"] input {
     background: var(--bg-card) !important;
     color: var(--text-primary) !important;
     border: 1px solid var(--border) !important;
     border-radius: var(--radius-sm) !important;
+    box-shadow: none !important;
+}
+[data-testid="stTextInput"] input:focus,
+[data-testid="stDateInput"] input:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 2px var(--accent-glow) !important;
+    outline: none !important;
 }
 .stButton > button {
     background: linear-gradient(135deg, #03C75A, #02a84e) !important;
@@ -379,6 +420,24 @@ div[data-baseweb="select"] span { color: var(--text-primary) !important; }
 LIGHT_CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
+
+/* 시스템/브라우저 다크모드 + Streamlit system theme 무시하고 앱 내부 라이트 테마 강제 */
+html {
+    color-scheme: light !important;
+}
+:root, [data-testid="stAppViewContainer"], [data-testid="stApp"], .stApp, body {
+    color-scheme: light !important;
+    /* Streamlit 내장 테마 변수 강제 오버라이드 */
+    --background-color: #f4f6f9 !important;
+    --secondary-background-color: #ffffff !important;
+    --primary-color: #03C75A !important;
+    --text-color: #1a1f2e !important;
+    --font: "Noto Sans KR", sans-serif !important;
+    --secondary-text-color: #5a6478 !important;
+    --widget-background-color: #ffffff !important;
+    --widget-border-color: #e2e8f0 !important;
+}
+
 :root {
     --bg-primary: #f4f6f9;
     --bg-secondary: #ffffff;
@@ -440,48 +499,89 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"], .main {
     background: var(--bg-primary) !important;
     color: var(--text-primary) !important;
 }
+/* Streamlit이 system dark로 data-theme="dark" 를 붙여도 라이트 스타일 강제 */
+[data-theme="dark"],
+[data-theme="dark"] [data-testid="stAppViewContainer"],
+[data-theme="dark"] [data-testid="stApp"],
+[data-theme="dark"] .stApp,
+html[data-theme="dark"],
+body[data-theme="dark"] {
+    color-scheme: light !important;
+    --background-color: #f4f6f9 !important;
+    --secondary-background-color: #ffffff !important;
+    --text-color: #1a1f2e !important;
+    background: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}
 [data-testid="stSidebar"] {
     background: var(--bg-secondary) !important;
     border-right: 1px solid var(--border) !important;
     box-shadow: 2px 0 12px rgba(0,0,0,0.04);
 }
-[data-testid="stSidebar"] * { color: var(--text-primary) !important; }
+/* 사이드바 글자색은 개별 요소에만 적용 (셀렉트박스 내부 글자색 덮어쓰지 않음) */
 
+/* 검색어 입력창 — 이중 테두리 제거, 단일 테두리만 */
+[data-testid="stTextInput"] > div,
+[data-testid="stTextInput"] > div > div,
+[data-testid="stDateInput"] > div,
+[data-testid="stDateInput"] > div > div {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
 .stTextInput > div > div > input,
-.stDateInput > div > div > input {
-    background: var(--bg-primary) !important;
+.stDateInput > div > div > input,
+[data-testid="stTextInput"] input,
+[data-testid="stDateInput"] input {
+    background: #ffffff !important;
     color: var(--text-primary) !important;
-    border: 1.5px solid var(--border) !important;
+    border: 1px solid #e2e8f0 !important;
     border-radius: var(--radius-sm) !important;
+    box-shadow: none !important;
+}
+[data-testid="stTextInput"] input:focus,
+[data-testid="stDateInput"] input:focus {
+    border-color: #03C75A !important;
+    box-shadow: 0 0 0 2px rgba(3,199,90,0.18) !important;
+    outline: none !important;
 }
 
-/* 💡 라이트 모드 셀렉트박스 및 드롭다운 배경 흰색, 글자 검정색 강제 지정 */
-/* 💡 라이트 모드 셀렉트박스: 컨트롤은 어두운 배경 + 흰 글자, 드롭다운 목록은 흰 배경 + 검정 글자 */
-/* Select control itself (including nested value containers) */
+/* 💡 라이트 모드 셀렉트박스: 3번(메인)과 동일하게 — 컨트롤 어두운 배경 + 흰 글자, 목록 흰 배경 + 검정 글자 */
+/* Select control (메인 / 사이드바 / 폼 모두 동일 적용) */
 div[data-baseweb="select"] > div,
 div[data-baseweb="select"] > div > div,
 div[data-baseweb="select"] div[data-baseweb="select"],
 [data-testid="stSelectbox"] div[data-baseweb="select"] > div,
 [data-testid="stSidebar"] div[data-baseweb="select"] > div,
-[data-testid="stSidebar"] [data-baseweb="select"] > div {
+[data-testid="stSidebar"] [data-baseweb="select"] > div,
+[data-testid="stForm"] div[data-baseweb="select"] > div,
+[data-testid="stForm"] [data-baseweb="select"] > div,
+[data-testid="stSidebar"] [data-testid="stForm"] div[data-baseweb="select"] > div {
     background-color: #1a222d !important;
     background: #1a222d !important;
     color: #ffffff !important;
     border: 1px solid #2a3441 !important;
     border-color: #2a3441 !important;
 }
-/* Text and icons inside select control — 선택된 값 글자 흰색 */
+/* Text and icons inside select control — 선택된 값 글자 흰색 (사이드바* 규칙보다 우선) */
 div[data-baseweb="select"] > div span,
 div[data-baseweb="select"] > div > div span,
-div[data-baseweb="select"] span[data-testid],
+div[data-baseweb="select"] span,
+div[data-baseweb="select"] div,
 [data-testid="stSelectbox"] div[data-baseweb="select"] span,
 [data-testid="stSidebar"] div[data-baseweb="select"] span,
-[data-testid="stSidebar"] [data-baseweb="select"] span {
+[data-testid="stSidebar"] [data-baseweb="select"] span,
+[data-testid="stForm"] div[data-baseweb="select"] span,
+[data-testid="stForm"] [data-baseweb="select"] span,
+[data-testid="stSidebar"] [data-testid="stForm"] div[data-baseweb="select"] span,
+[data-testid="stSidebar"] [data-testid="stForm"] [data-baseweb="select"] span {
     color: #ffffff !important;
 }
 div[data-baseweb="select"] svg,
 [data-testid="stSelectbox"] svg,
-[data-testid="stSidebar"] div[data-baseweb="select"] svg {
+[data-testid="stSidebar"] div[data-baseweb="select"] svg,
+[data-testid="stForm"] div[data-baseweb="select"] svg,
+[data-testid="stSidebar"] [data-testid="stForm"] div[data-baseweb="select"] svg {
     fill: #ffffff !important;
     color: #ffffff !important;
 }
@@ -593,7 +693,15 @@ li[role="option"][aria-selected="true"] span {
     padding: 4px;
     border: 1px solid var(--border);
 }
-.stTabs [data-baseweb="tab"] {
+/* 비활성 탭: 어두운 글자 (시스템 다크모드 / data-theme 무시) */
+.stTabs [data-baseweb="tab"],
+.stTabs button[data-baseweb="tab"],
+.stTabs [role="tab"],
+.stTabs button[role="tab"],
+button[data-baseweb="tab"],
+div[role="tab"],
+[data-testid="stTabs"] [data-baseweb="tab"],
+[data-testid="stTabs"] button {
     background: transparent !important;
     color: #1a1f2e !important;
     border-radius: 8px !important;
@@ -601,17 +709,38 @@ li[role="option"][aria-selected="true"] span {
 }
 .stTabs [data-baseweb="tab"] p,
 .stTabs [data-baseweb="tab"] span,
-.stTabs [data-baseweb="tab"] * {
+.stTabs [data-baseweb="tab"] div,
+.stTabs [data-baseweb="tab"] *,
+.stTabs button[data-baseweb="tab"] *,
+.stTabs [role="tab"] *,
+.stTabs button[role="tab"] *,
+button[data-baseweb="tab"] *,
+div[role="tab"] *,
+[data-testid="stTabs"] [data-baseweb="tab"] *,
+[data-testid="stTabs"] button * {
     color: #1a1f2e !important;
 }
-.stTabs [aria-selected="true"] {
+/* 활성 탭: 초록 배경 + 흰 글자 */
+.stTabs [aria-selected="true"],
+.stTabs button[aria-selected="true"],
+.stTabs [role="tab"][aria-selected="true"],
+button[data-baseweb="tab"][aria-selected="true"],
+div[role="tab"][aria-selected="true"],
+[data-testid="stTabs"] [aria-selected="true"] {
     background: var(--accent) !important;
-    color: #fff !important;
+    background-color: #03C75A !important;
+    color: #ffffff !important;
 }
 .stTabs [aria-selected="true"] p,
 .stTabs [aria-selected="true"] span,
-.stTabs [aria-selected="true"] * {
-    color: #fff !important;
+.stTabs [aria-selected="true"] div,
+.stTabs [aria-selected="true"] *,
+.stTabs button[aria-selected="true"] *,
+.stTabs [role="tab"][aria-selected="true"] *,
+button[data-baseweb="tab"][aria-selected="true"] *,
+div[role="tab"][aria-selected="true"] *,
+[data-testid="stTabs"] [aria-selected="true"] * {
+    color: #ffffff !important;
 }
 
 ::-webkit-scrollbar { width: 6px; }
