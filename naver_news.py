@@ -456,28 +456,36 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"], .main {
 }
 
 /* 💡 라이트 모드 셀렉트박스 및 드롭다운 배경 흰색, 글자 검정색 강제 지정 */
+/* 💡 라이트 모드 셀렉트박스: 컨트롤은 어두운 배경 + 흰 글자, 드롭다운 목록은 흰 배경 + 검정 글자 */
 /* Select control itself (including nested value containers) */
 div[data-baseweb="select"] > div,
 div[data-baseweb="select"] > div > div,
 div[data-baseweb="select"] div[data-baseweb="select"],
 [data-testid="stSelectbox"] div[data-baseweb="select"] > div,
-[data-testid="stSidebar"] div[data-baseweb="select"] > div {
-    background-color: #ffffff !important;
-    background: #ffffff !important;
-    color: #1a1f2e !important;
-    border: 1px solid #e2e8f0 !important;
-    border-color: #e2e8f0 !important;
+[data-testid="stSidebar"] div[data-baseweb="select"] > div,
+[data-testid="stSidebar"] [data-baseweb="select"] > div {
+    background-color: #1a222d !important;
+    background: #1a222d !important;
+    color: #ffffff !important;
+    border: 1px solid #2a3441 !important;
+    border-color: #2a3441 !important;
 }
-/* Text and icons inside select */
-div[data-baseweb="select"] span,
+/* Text and icons inside select control — 선택된 값 글자 흰색 */
+div[data-baseweb="select"] > div span,
+div[data-baseweb="select"] > div > div span,
+div[data-baseweb="select"] span[data-testid],
+[data-testid="stSelectbox"] div[data-baseweb="select"] span,
+[data-testid="stSidebar"] div[data-baseweb="select"] span,
+[data-testid="stSidebar"] [data-baseweb="select"] span {
+    color: #ffffff !important;
+}
 div[data-baseweb="select"] svg,
-div[data-baseweb="select"] *,
-[data-testid="stSelectbox"] span,
-[data-testid="stSidebar"] div[data-baseweb="select"] span {
-    color: #1a1f2e !important;
-    fill: #1a1f2e !important;
+[data-testid="stSelectbox"] svg,
+[data-testid="stSidebar"] div[data-baseweb="select"] svg {
+    fill: #ffffff !important;
+    color: #ffffff !important;
 }
-/* Dropdown popover / menu (often rendered in portal outside sidebar) */
+/* Dropdown popover / menu (portal 로 렌더링되는 목록) */
 div[data-baseweb="popover"],
 div[data-baseweb="popover"] > div,
 div[data-baseweb="menu"],
@@ -491,7 +499,7 @@ div[role="listbox"],
     border-color: #e2e8f0 !important;
     box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
 }
-/* Options */
+/* Options — 목록 글자 검정 */
 li[data-baseweb="option"],
 li[role="option"],
 div[role="option"],
@@ -513,10 +521,20 @@ div[role="option"]:hover,
     background-color: #f0f3f7 !important;
     color: #03C75A !important;
 }
+li[data-baseweb="option"]:hover span,
+li[role="option"]:hover span,
+[data-baseweb="menu"] li:hover span {
+    color: #03C75A !important;
+}
 li[aria-selected="true"],
 li[data-baseweb="option"][aria-selected="true"],
 li[role="option"][aria-selected="true"] {
     background-color: #e6f9ef !important;
+    color: #03C75A !important;
+}
+li[aria-selected="true"] span,
+li[data-baseweb="option"][aria-selected="true"] span,
+li[role="option"][aria-selected="true"] span {
     color: #03C75A !important;
 }
 /* Ensure sidebar text remains dark (overrides any residual) */
@@ -577,12 +595,22 @@ li[role="option"][aria-selected="true"] {
 }
 .stTabs [data-baseweb="tab"] {
     background: transparent !important;
-    color: var(--text-secondary) !important;
+    color: #1a1f2e !important;
     border-radius: 8px !important;
     font-weight: 500 !important;
 }
+.stTabs [data-baseweb="tab"] p,
+.stTabs [data-baseweb="tab"] span,
+.stTabs [data-baseweb="tab"] * {
+    color: #1a1f2e !important;
+}
 .stTabs [aria-selected="true"] {
     background: var(--accent) !important;
+    color: #fff !important;
+}
+.stTabs [aria-selected="true"] p,
+.stTabs [aria-selected="true"] span,
+.stTabs [aria-selected="true"] * {
     color: #fff !important;
 }
 
