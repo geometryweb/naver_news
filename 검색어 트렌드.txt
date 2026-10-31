@@ -1,0 +1,19 @@
+검색어 트렌드
+https://api.ncloud-docs.com/docs/naver-api-hub-search-trend
+https://api.ncloud-docs.com/docs/naver-api-hub-search-trend-examples
+
+쇼핑 인사이트
+https://api.ncloud-docs.com/docs/naver-api-hub-shopping-insight-categories
+https://api.ncloud-docs.com/docs/naver-api-hub-shopping-insight-device
+https://api.ncloud-docs.com/docs/naver-api-hub-shopping-insight-gender
+https://api.ncloud-docs.com/docs/naver-api-hub-shopping-insight-age
+https://api.ncloud-docs.com/docs/naver-api-hub-shopping-insight-keywords
+https://api.ncloud-docs.com/docs/naver-api-hub-shopping-insight-keyword-device
+https://api.ncloud-docs.com/docs/naver-api-hub-shopping-insight-keyword-gender
+https://api.ncloud-docs.com/docs/naver-api-hub-shopping-insight-keyword-age
+https://api.ncloud-docs.com/docs/naver-api-hub-shopping-insight-examples
+
+
+
+
+
